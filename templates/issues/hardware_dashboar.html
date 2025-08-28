@@ -1,0 +1,120 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="padding:2rem;">
+    <h2 style="margin-bottom:1.5rem; color:#374151;">⚙️ Hardware Team Dashboard</h2>
+
+    <!-- Assigned Issues -->
+    <h3 style="margin-bottom:1rem; color:#111827;">Assigned to You</h3>
+    <div style="
+        overflow-x:auto;
+        background:#fff;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom:2rem;
+    ">
+        <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+            <thead style="background:#f3f4f6; text-align:left;">
+                <tr>
+                    <th style="padding:0.75rem;">ID</th>
+                    <th style="padding:0.75rem;">Title</th>
+                    <th style="padding:0.75rem;">Status</th>
+                    <th style="padding:0.75rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in assigned %}
+                <tr style="border-top:1px solid #e5e7eb;">
+                    <td style="padding:0.75rem;">{{ issue.id }}</td>
+                    <td style="padding:0.75rem; font-weight:500;">{{ issue.title }}</td>
+                    <td style="padding:0.75rem;">
+                        <span style="
+                            padding:0.3rem 0.6rem;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            font-weight:600;
+                            background: {% if issue.status == 'Resolved' %}#d1fae5{% else %}#fef3c7{% endif %};
+                            color: {% if issue.status == 'Resolved' %}#065f46{% else %}#92400e{% endif %};
+                        ">
+                            {{ issue.status }}
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem;">
+                        <a href="{% url 'issues:issue_detail' issue.id %}" 
+                           style="color:#4f46e5; font-weight:500; text-decoration:none; margin-right:0.5rem;">
+                           View →
+                        </a>
+                        <a href="{% url 'issues:resolve_issue' issue.id %}" 
+                           style="color:#16a34a; font-weight:500; text-decoration:none;">
+                           Resolve
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding:1rem; text-align:center; color:#6b7280;">
+                        No assigned issues
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pending Issues -->
+    <h3 style="margin-bottom:1rem; color:#111827;">Pending (Unassigned)</h3>
+    <div style="
+        overflow-x:auto;
+        background:#fff;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    ">
+        <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+            <thead style="background:#f3f4f6; text-align:left;">
+                <tr>
+                    <th style="padding:0.75rem;">ID</th>
+                    <th style="padding:0.75rem;">Title</th>
+                    <th style="padding:0.75rem;">Priority</th>
+                    <th style="padding:0.75rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in pending %}
+                <tr style="border-top:1px solid #e5e7eb;">
+                    <td style="padding:0.75rem;">{{ issue.id }}</td>
+                    <td style="padding:0.75rem; font-weight:500;">{{ issue.title }}</td>
+                    <td style="padding:0.75rem;">
+                        <span style="
+                            padding:0.3rem 0.6rem;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            font-weight:600;
+                            background: {% if issue.priority == 'High' %}#fee2e2{% elif issue.priority == 'Medium' %}#fef3c7{% else %}#dbeafe{% endif %};
+                            color: {% if issue.priority == 'High' %}#991b1b{% elif issue.priority == 'Medium' %}#92400e{% else %}#1e3a8a{% endif %};
+                        ">
+                            {{ issue.priority }}
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem;">
+                        <a href="{% url 'issues:issue_detail' issue.id %}" 
+                           style="color:#4f46e5; font-weight:500; text-decoration:none; margin-right:0.5rem;">
+                           View →
+                        </a>
+                        <a href="{% url 'issues:claim_issue' issue.id %}" 
+                           style="color:#2563eb; font-weight:500; text-decoration:none;">
+                           Claim
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding:1rem; text-align:center; color:#6b7280;">
+                        No pending issues
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

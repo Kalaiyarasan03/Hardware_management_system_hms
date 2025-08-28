@@ -1,0 +1,156 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="padding:2rem;">
+    <h2 style="margin-bottom:1.5rem; color:#1f2937; font-weight:600;">📊 Reports Dashboard</h2>
+
+    <!-- Stats Overview -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-bottom:2rem;">
+        <div style="background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); text-align:center;">
+            <h3 style="color:#374151; font-size:1.2rem; margin-bottom:0.5rem;">Total Issues</h3>
+            <p style="font-size:1.5rem; font-weight:700; color:#2563eb;">{{ total_issues }}</p>
+        </div>
+        <div style="background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); text-align:center;">
+            <h3 style="color:#374151; font-size:1.2rem; margin-bottom:0.5rem;">Open Issues</h3>
+            <p style="font-size:1.5rem; font-weight:700; color:#dc2626;">{{ open_issues }}</p>
+        </div>
+        <div style="background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); text-align:center;">
+            <h3 style="color:#374151; font-size:1.2rem; margin-bottom:0.5rem;">Resolved Issues</h3>
+            <p style="font-size:1.5rem; font-weight:700; color:#16a34a;">{{ resolved_issues }}</p>
+        </div>
+        <div style="background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); text-align:center;">
+            <h3 style="color:#374151; font-size:1.2rem; margin-bottom:0.5rem;">High Priority</h3>
+            <p style="font-size:1.5rem; font-weight:700; color:#f59e0b;">{{ high_priority }}</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:2rem;">
+        <div style="background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h3 style="color:#374151; margin-bottom:1rem; font-weight:500;">Open vs Resolved</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+        <div style="background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h3 style="color:#374151; margin-bottom:1rem; font-weight:500;">Issues by Team</h3>
+            <canvas id="teamChart"></canvas>
+        </div>
+    </div>
+</div>
+<div style="
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+">
+    <h3 style="
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    ">
+        <i class="fas fa-download"></i>
+        Export Reports
+    </h3>
+
+    <div style="
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    ">
+        <a href="{% url 'issues:download_pdf' %}" target="_blank" style="
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid transparent;
+            min-width: 180px;
+            color: #e02f2f;
+            background-color: #fff0f0;
+            position: relative;
+            transition: background-color 0.3s ease;
+        " 
+        onmouseover="this.style.backgroundColor='#f8d7da';"
+        onmouseout="this.style.backgroundColor='#fff0f0';"
+        >
+            <i class="fas fa-file-pdf"></i>
+            <span>Download PDF</span>
+        </a>
+
+        <a href="{% url 'issues:download_csv' %}" target="_blank" style="
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid transparent;
+            min-width: 180px;
+            color: #2f7a2f;
+            background-color: #f0fff0;
+            position: relative;
+            transition: background-color 0.3s ease;
+        " 
+        onmouseover="this.style.backgroundColor='#d4edda';"
+        onmouseout="this.style.backgroundColor='#f0fff0';"
+        >
+            <i class="fas fa-file-csv"></i>
+            <span>Download CSV</span>
+        </a>
+    </div>
+</div>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Open vs Resolved Chart
+    const ctx1 = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Open', 'Resolved'],
+            datasets: [{
+                data: [{{ open_issues }}, {{ resolved_issues }}],
+                backgroundColor: ['#dc2626', '#16a34a'],
+            }]
+        }
+    });
+
+    // Issues by Team Chart
+    const ctx2 = document.getElementById('teamChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: {{ teams|safe }},
+            datasets: [{
+                label: 'Issues',
+                data: {{ team_issues|safe }},
+                backgroundColor: '#2563eb'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+
+

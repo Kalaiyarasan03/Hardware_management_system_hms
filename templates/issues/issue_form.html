@@ -1,0 +1,54 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="
+    max-width:600px;
+    margin:2rem auto;
+    padding:2rem;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+">
+    <h2 style="margin-bottom:1.5rem; color:#374151; text-align:center;">Raise New Issue</h2>
+
+    <form method="post" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:1rem;">
+        {% csrf_token %}
+        
+        <!-- Render form fields with styling -->
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" style="display:block; font-weight:500; margin-bottom:0.3rem;">
+                {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <small style="color:#6b7280;">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <div style="color:#dc2626; font-size:0.85rem;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem; width:100%;">
+            Submit
+        </button>
+    </form>
+</div>
+
+<!-- Optional CSS to style Django form fields -->
+<style>
+  input, select, textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
+  }
+</style>
+{% endblock %}

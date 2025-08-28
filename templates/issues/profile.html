@@ -1,0 +1,25 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="max-width:500px; margin:2rem auto;">
+    <div style="
+        background:#fff;
+        padding:2rem;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    ">
+        <h2 style="margin-bottom:1.5rem; color:#374151; text-align:center;">👤 User Profile</h2>
+
+        <p style="margin-bottom:1rem; font-size:1rem; color:#374151;">
+            <strong>Username:</strong> {{ user.username }}
+        </p>
+        <p style="margin-bottom:1rem; font-size:1rem; color:#374151;">
+            <strong>Email:</strong> {{ user.email }}
+        </p>
+
+        <div style="text-align:center; margin-top:2rem;">
+            <a href="{% url 'issues:logout' %}" class="btn btn-outline">Logout</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

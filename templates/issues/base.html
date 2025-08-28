@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load group_tags %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Issue Tracker{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .gradient-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .glass-dark { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .animate-glow { animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); } to { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); } }
+        .pattern-dots { background-image: radial-gradient(circle, rgba(102, 126, 234, 0.1) 1px, transparent 1px); background-size: 20px 20px; }
+        .btn-hover-effect { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .btn-hover-effect::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+        .btn-hover-effect:hover::before { left: 100%; }
+    </style>
+</head>
+<body class="bg-slate-50 pattern-dots min-h-screen">
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 gradient-primary rounded-full opacity-10 animate-float"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 gradient-success rounded-full opacity-10 animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="glass fixed w-full z-50 border-b border-white/20 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center animate-glow">
+                        <i class="fas fa-tasks text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            Issue Tracker
+                        </span>
+                        <div class="text-xs text-gray-500 font-medium">Hardware Management System</div>
+                    </div>
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    {% if user.is_authenticated %}
+                        <div class="flex items-center space-x-1 mr-6">
+                            {% if user.userprofile.role == "admin" %}
+                                <a href="{% url 'admin:index' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-cog"></i><span>Admin Panel</span></a>
+                                <a href="{% url 'issues:dashboard' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                                <a href="{% url 'issues:issue_list' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
+                                 <a href="{% url 'issues:issue_create' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
+                                <a href="{% url 'issues:reports' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+                            {% elif user.userprofile.role == "manager" %}
+                                <a href="{% url 'issues:dashboard' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-users-cog"></i><span>Manager View</span></a>
+                                <a href="{% url 'issues:issue_list' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
+                                 <a href="{% url 'issues:issue_create' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
+                                <a href="{% url 'issues:reports' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+
+                            {% elif user.userprofile.role == "hardware" %}
+                                <a href="{% url 'issues:dashboard' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-wrench"></i><span>My Work Queue</span></a>
+                                <a href="{% url 'issues:issue_list' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-tasks"></i><span>Available Issues</span></a>
+
+                            {% elif user.userprofile.role == "employee" %}
+                                <a href="{% url 'issues:dashboard' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-user-circle"></i><span>My Dashboard</span></a>
+                                <a href="{% url 'issues:issue_create' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
+                            
+                            {% else %}
+                                <a href="{% url 'issues:dashboard' %}" class="nav-link flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600">Dashboard</a>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center space-x-4 pl-6 border-l border-gray-200/50">
+                            <a href="{% url 'issues:profile' %}" class="text-gray-700 hover:text-indigo-600"><i class="fas fa-user"></i></a>
+                            <form method="post" action="{% url 'issues:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-hover-effect bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'issues:login' %}" class="btn-hover-effect gradient-success text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2">
+                            <i class="fas fa-sign-in-alt"></i><span>Login</span>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-indigo-600 focus:outline-none p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="md:hidden hidden glass-dark border-t border-white/20">
+            <div class="px-4 py-6 space-y-4">
+                {% if user.is_authenticated %}
+                    <div class="flex items-center space-x-3 pb-4 border-b border-white/10">
+                        <div class="w-10 h-10 gradient-info rounded-full flex items-center justify-center"><i class="fas fa-user text-white"></i></div>
+                        <div>
+                            <div class="text-white font-semibold">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-gray-300 text-sm">
+                                {% if user.userprofile.role == "admin" %}Admin
+                                {% elif user.userprofile.role == "manager" %}Manager
+                                {% elif user.userprofile.role == "hardware" %}Hardware Team
+                                {% elif user.userprofile.role == "employee" %}Employee
+                                {% else %}User{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.userprofile.role == "admin" %}
+                         <a href="{% url 'admin:index' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-cog"></i><span>Admin Panel</span></a>
+                        <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                        <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
+                        <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
+                        <a href="{% url 'issues:reports' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+                    {% elif user.userprofile.role == "manager" %}
+                         <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-users-cog"></i><span>Manager View</span></a>
+                        <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
+                        <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
+                        <a href="{% url 'issues:reports' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+
+                    {% elif user.userprofile.role == "hardware" %}
+                        <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-wrench"></i><span>My Work Queue</span></a>
+                        <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-tasks"></i><span>Available Issues</span></a>
+                    {% elif user.userprofile.role == "employee" %}
+                         <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user-circle w-5"></i><span>My Dashboard</span></a>
+                         <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle w-5"></i><span>Raise an Issue</span></a>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'issues:logout' %}" class="pt-4 border-t border-white/10">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full gradient-danger text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2">
+                            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'issues:login' %}" class="w-full gradient-success text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <i class="fas fa-sign-in-alt"></i><span>Login</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-20 min-h-screen relative z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="relative bg-gray-900 text-white">
+        </footer>
+
+   <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const menuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    menuButton.addEventListener("click", () => {
+        if (mobileMenu.classList.contains("hidden")) {
+            mobileMenu.classList.remove("hidden");
+        } else {
+            mobileMenu.classList.add("hidden");
+        }
+    });
+});
+</script>
+
+</body>
+</html>

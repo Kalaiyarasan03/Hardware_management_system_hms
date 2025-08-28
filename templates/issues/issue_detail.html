@@ -1,0 +1,695 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<style>
+    .detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .issue-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .issue-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .issue-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .issue-id {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .issue-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .issue-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #4f46e5;
+    }
+
+    .info-card h3 {
+        color: #4f46e5;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-item i {
+        color: #64748b;
+        width: 20px;
+        text-align: center;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #374151;
+        min-width: 80px;
+    }
+
+    .info-value {
+        color: #64748b;
+        flex: 1;
+    }
+
+    .status-badge, .priority-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-open { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
+    .status-pending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
+    .status-resolved { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
+    .status-progress { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e3a8a; }
+
+    .priority-high { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
+    .priority-medium { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
+    .priority-low { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e3a8a; }
+
+    .description-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border-left: 4px solid #10b981;
+    }
+
+    .description-section h3 {
+        color: #10b981;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .description-text {
+        color: #374151;
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+    .attachment-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 2px dashed #0ea5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    .attachment-card i {
+        font-size: 2rem;
+        color: #0ea5e9;
+        margin-bottom: 0.5rem;
+    }
+
+    .attachment-link {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .attachment-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+    }
+
+    .comments-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        margin: 2rem 0;
+    }
+
+    .comments-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        color: #374151;
+    }
+
+    .comments-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .comment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .comment-item {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .comment-item:hover {
+        border-left-color: #4f46e5;
+        transform: translateX(4px);
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .comment-author {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .comment-time {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .comment-content {
+        color: #374151;
+        line-height: 1.6;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: #64748b;
+        font-style: italic;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 2px dashed #e2e8f0;
+    }
+
+    .comment-form {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 1px solid #e0f2fe;
+    }
+
+    .comment-form h4 {
+        color: #0ea5e9;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: #374151;
+        background: white;
+        transition: all 0.3s ease;
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(107, 114, 128, 0.4);
+    }
+
+    .action-buttons {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #f59e0b;
+    }
+
+    .action-buttons h3 {
+        color: #f59e0b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .detail-container {
+            padding: 0 0.5rem;
+            margin: 1rem auto;
+        }
+        
+        .main-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .issue-content,
+        .comments-section {
+            padding: 1.5rem;
+        }
+        
+        .issue-header {
+            padding: 2rem 1rem;
+        }
+        
+        .issue-header h2 {
+            font-size: 1.75rem;
+        }
+        
+        .action-group {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="detail-container">
+    <div class="issue-header">
+        <div class="issue-id">Issue #{{ issue.id }}</div>
+        <h2>{{ issue.title }}</h2>
+    </div>
+
+    <div class="main-grid">
+        <div class="issue-content">
+            <div class="description-section">
+                 <h3>
+                    <i class="fas fa-file-alt"></i>
+                    Description
+                    <small class="text-muted">
+                        {{ issue.created_at|date:"F j, Y \a\t g:i A" }}
+                    </small>
+                </h3>
+                <div class="description-text">
+                    {{ issue.description|linebreaks }}
+                </div>
+            </div>
+
+            {% if issue.attachment %}
+            <div class="attachment-card">
+                <i class="fas fa-paperclip"></i>
+                <p><strong>Attachment Available</strong></p>
+                <a href="{{ issue.attachment.url }}" class="attachment-link">
+                    <i class="fas fa-download"></i>
+                    Download File
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="issue-sidebar">
+            <div class="info-card">
+                <h3>
+                    <i class="fas fa-info-circle"></i>
+                    Issue Details
+                </h3>
+                <div class="info-item">
+                    <i class="fas fa-flag"></i>
+                    <span class="info-label">Status:</span>
+                    <span class="status-badge status-{{ issue.status|lower }}">
+                        {% if issue.status == 'resolved' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif issue.status == 'pending' %}
+                            <i class="fas fa-clock"></i>
+                        {% elif issue.status == 'open' %}
+                            <i class="fas fa-circle"></i>
+                        {% else %}
+                            <i class="fas fa-spinner"></i>
+                        {% endif %}
+                        {{ issue.status|title }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="info-label">Priority:</span>
+                    <span class="priority-badge priority-{{ issue.priority|lower }}">
+                        {% if issue.priority == 'high' %}
+                            <i class="fas fa-arrow-up"></i>
+                        {% elif issue.priority == 'medium' %}
+                            <i class="fas fa-minus"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-down"></i>
+                        {% endif %}
+                        {{ issue.priority|title }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user"></i>
+                    <span class="info-label">Raised by:</span>
+                    <span class="info-value">{{ issue.raised_by.username }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-tag"></i>
+                    <span class="info-label">Assigned to:</span>
+                    <span class="info-value">
+                        {% if issue.assigned_to %} 
+                            {{ issue.assigned_to.username }} 
+                        {% else %} 
+                            <em>Unassigned</em> 
+                            {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-store"></i>
+                    <span class="info-label">Store:</span>
+                    <span class="info-value">
+                        {% if issue.store_name %}
+                            {{ issue.store_name }}
+                        {% else %}
+                            <em>Not specified</em>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- ADD FLOOR -->
+                <div class="info-item">
+                    <i class="fas fa-building"></i>
+                    <span class="info-label">Floor:</span>
+                    <span class="info-value">
+                        {% if issue.floor %}
+                            {{ issue.floor }}
+                        {% else %}
+                    <em>Not specified</em>
+                    {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}  
+            {% if user.userprofile.role == 'manager' or user.is_superuser %}
+            <div class="action-buttons">
+                {% if issue.assigned_to == user and issue.status != 'resolved' %}
+                    <a href="{% url 'issues:resolve_issue' issue.id %}" class="btn btn-success">
+                        <i class="fas fa-check"></i>
+                        Mark Resolved
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+            {% if user.is_authenticated %}  
+           {% if user.userprofile.role == 'manager' or user.userprofile.role == 'hardware' or user.is_superuser %}
+
+            <div class="action-buttons">
+                <h3>
+                    <i class="fas fa-cogs"></i>
+                    Management
+                </h3>
+                <div class="action-group">
+                    <a href="{% url 'issues:issue_update' issue.id %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i>
+                        Update / Assign
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <div class="comments-header">
+            <i class="fas fa-comments"></i>
+            <h3>Comments</h3>
+        </div>
+
+        <ul class="comment-list">
+            {% for c in issue.comments.all %}
+                <li class="comment-item">
+                    <div class="comment-header">
+                        <div class="comment-author">
+                            <i class="fas fa-user"></i>
+                            {{ c.author.username }}
+                        </div>
+                        <div class="comment-time">
+                            <i class="fas fa-clock"></i>
+                            {{ c.created_at|date:"F j, Y \a\t g:i A" }}
+                        </div>
+                    </div>
+                    <div class="comment-content">
+                        {{ c.content|linebreaks }}
+                    </div>
+                </li>
+            {% empty %}
+                <li class="no-comments">
+                    <i class="fas fa-comment-slash" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p>No comments yet. Be the first to add a comment!</p>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if user.is_authenticated %}
+        <div class="comment-form">
+            <h4>
+                <i class="fas fa-plus-circle"></i>
+                Add Your Comment
+            </h4>
+            <form method="post" action="{% url 'issues:post_comment' issue.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ comment_form.as_p }}
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Add Comment
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Add subtle animations when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.info-card, .issue-content, .comments-section, .action-buttons');
+    
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Add hover effects to comment items
+    const commentItems = document.querySelectorAll('.comment-item');
+    commentItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.boxShadow = 'none';
+        });
+    });
+});
+
+// Form enhancement
+const form = document.querySelector('form[action*="post_comment"]');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        const button = this.querySelector('button[type="submit"]');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        button.disabled = true;
+    });
+}
+</script>
+
+{% endblock %}

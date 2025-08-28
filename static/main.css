@@ -1,0 +1,12 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+header h1 { margin: 0; }
+table { border-collapse: collapse; width: 100%; }
+body { font-family: system-ui, sans-serif; margin: 0; background:#f7f7f7; }
+header { background:#0b5; color:#fff; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
+nav a { color:#fff; margin-right:12px; text-decoration:none; }
+.container, main { max-width: 1000px; margin: 24px auto; background:#fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+table { width:100%; border-collapse: collapse; margin-top: 12px; }
+th, td { border-bottom:1px solid #eee; padding: 8px; text-align:left; }
+button { padding:8px 12px; border:0; background:#0b5; color:#fff; border-radius:6px; cursor:pointer; }
+input[type='text'], input[type='password'], textarea, select { width:100%; padding:8px; margin: 4px 0 8px; border:1px solid #ccc; border-radius:6px; }
+.msg { background:#eef8ee; border:1px solid #cfe8cf; padding:8px; border-radius:6px; margin-bottom:8px; }

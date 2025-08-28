@@ -1,0 +1,76 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="padding:2rem;">
+    <h2 style="margin-bottom:1.5rem; color:#374151;">📋 All Issues</h2>
+
+    <div style="
+        overflow-x:auto;
+        background:#fff;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    ">
+        <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+            <thead style="background:#f3f4f6; text-align:left;">
+                <tr>
+                    <th style="padding:0.75rem;">ID</th>
+                    <th style="padding:0.75rem;">Title</th>
+                    <th style="padding:0.75rem;">Status</th>
+                    <th style="padding:0.75rem;">Priority</th>
+                    <th style="padding:0.75rem;">Store</th>
+                    <th style="padding:0.75rem;">Floor</th>
+                    <th style="padding:0.75rem;">Raised By</th>
+                    <th style="padding:0.75rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr style="border-top:1px solid #e5e7eb;">
+                    <td style="padding:0.75rem;">{{ issue.id }}</td>
+                    <td style="padding:0.75rem; font-weight:500;">{{ issue.title }}</td>
+                    <td style="padding:0.75rem;">
+                        <span style="
+                            padding:0.3rem 0.6rem;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            font-weight:600;
+                            background: {% if issue.status == 'Resolved' %}#d1fae5{% elif issue.status == 'Open' %}#fee2e2{% else %}#fef3c7{% endif %};
+                            color: {% if issue.status == 'Resolved' %}#065f46{% elif issue.status == 'Open' %}#991b1b{% else %}#92400e{% endif %};
+                        ">
+                            {{ issue.status }}
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem;">
+                        <span style="
+                            padding:0.3rem 0.6rem;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            font-weight:600;
+                            background: {% if issue.priority == 'High' %}#fee2e2{% elif issue.priority == 'Medium' %}#fef3c7{% else %}#dbeafe{% endif %};
+                            color: {% if issue.priority == 'High' %}#991b1b{% elif issue.priority == 'Medium' %}#92400e{% else %}#1e3a8a{% endif %};
+                        ">
+                            {{ issue.priority }}
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem;">{{ issue.store_name }}</td>
+                    <td style="padding:0.75rem;">{{ issue.floor }}</td>
+                    <td style="padding:0.75rem;">{{ issue.raised_by.username }}</td>
+                    <td style="padding:0.75rem;">
+                        <a href="{% url 'issues:issue_detail' issue.id %}" 
+                           style="color:#4f46e5; font-weight:500; text-decoration:none;">
+                           View →
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="padding:1rem; text-align:center; color:#6b7280;">
+                        No issues found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

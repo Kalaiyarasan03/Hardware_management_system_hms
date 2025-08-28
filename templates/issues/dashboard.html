@@ -1,0 +1,72 @@
+{% extends 'issues/base.html' %}
+
+{% block content %}
+<div style="padding:2rem;">
+    <h2 style="margin-bottom:1rem; color:#374151;">
+    <span style="
+                            padding:0.3rem 0.6rem;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            font-weight:600;
+                            background: {% if user.userprofile.role == 'admin' %}#d1fae5{% elif user.userprofile.role == 'manager' %}#fee2e2{% else %}#fef3c7{% endif %};
+                            color: {% if user.userprofile.role == 'admin' %}#065f46{% elif user.userprofile.role == 'manager' %}#991b1b{% else %}#92400e{% endif %};
+                        ">
+                         {{ user.userprofile.role }}
+                        </span></h2>
+
+    <p style="margin-bottom:1.5rem;">
+        <a href="{% url 'issues:issue_create' %}" class="btn btn-primary">+ Raise New Issue</a>
+    </p>
+
+    <div style="
+        overflow-x:auto;
+        background:#fff;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    ">
+        <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+            <thead style="background:#f3f4f6; text-align:left;">
+                <tr>
+                    <th style="padding:0.75rem;">ID</th>
+                    <th style="padding:0.75rem;">Title</th>
+                    <th style="padding:0.75rem;">Status</th>
+                    <th style="padding:0.75rem;">Priority</th>
+                    <th style="padding:0.75rem;">Raised By</th>
+                    <th style="padding:0.75rem;">Assigned To</th>
+                    <th style="padding:0.75rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr style="border-top:1px solid #e5e7eb;">
+                    <td style="padding:0.75rem;">{{ issue.id }}</td>
+                    <td style="padding:0.75rem; font-weight:500;">{{ issue.title }}</td>
+                    <td style="padding:0.75rem;">{{ issue.status }}</td>
+                    <td style="padding:0.75rem;">{{ issue.priority }}</td>
+                    <td style="padding:0.75rem;">{{ issue.raised_by.username }}</td>
+                    <td style="padding:0.75rem;">
+                        {% if issue.assigned_to %}
+                            {{ issue.assigned_to.username }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td style="padding:0.75rem;">
+                        <a href="{% url 'issues:issue_detail' issue.id %}" 
+                           style="color:#4f46e5; font-weight:500; text-decoration:none;">
+                           View →
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="padding:1rem; text-align:center; color:#6b7280;">
+                        No issues
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
