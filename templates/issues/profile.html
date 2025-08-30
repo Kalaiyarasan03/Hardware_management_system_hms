@@ -1,25 +1,729 @@
 {% extends 'issues/base.html' %}
 
 {% block content %}
-<div style="max-width:500px; margin:2rem auto;">
-    <div style="
-        background:#fff;
-        padding:2rem;
-        border-radius:12px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.08);
-    ">
-        <h2 style="margin-bottom:1.5rem; color:#374151; text-align:center;">👤 User Profile</h2>
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
 
-        <p style="margin-bottom:1rem; font-size:1rem; color:#374151;">
-            <strong>Username:</strong> {{ user.username }}
-        </p>
-        <p style="margin-bottom:1rem; font-size:1rem; color:#374151;">
-            <strong>Email:</strong> {{ user.email }}
-        </p>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
 
-        <div style="text-align:center; margin-top:2rem;">
-            <a href="{% url 'issues:logout' %}" class="btn btn-outline">Logout</a>
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        margin: 0 auto 1.5rem;
+        display: block;
+        object-fit: cover;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 2;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-role {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+        backdrop-filter: blur(10px);
+        text-transform: capitalize;
+    }
+
+    .profile-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #4f46e5;
+    }
+
+    .info-card h3 {
+        color: #4f46e5;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .info-item:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-item i {
+        color: #64748b;
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #374151;
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        color: #64748b;
+        flex: 1;
+        word-wrap: break-word;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-left:  4px solid #4f46e5;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4f46e5;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .actions-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left:  4px solid #4f46e5;
+        grid-column: 1 / -1;
+    }
+
+    .actions-card h3 {
+        color: #4f46e5;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        min-height: 44px;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px #667eea;
+    }
+
+    .btn-success:hover {
+        box-shadow: 0 8px 20px  #667eea;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg,  #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px #667eea;
+    }
+
+    .btn-warning:hover {
+        box-shadow: 0 8px 20px #667eea;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .upload-section {
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .upload-section:hover {
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    }
+
+    .upload-section.dragover {
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+        transform: scale(1.02);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #9ca3af;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .upload-section:hover .upload-icon {
+        color: #4f46e5;
+        transform: scale(1.1);
+    }
+
+    .upload-text {
+        color: #6b7280;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .upload-btn {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .recent-activity {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+    }
+
+    .recent-activity h3 {
+        color: #374151;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background: #f8fafc;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.created {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .activity-icon.updated {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .activity-icon.commented {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0 0.75rem;
+            margin: 1rem auto;
+        }
+
+        .profile-header {
+            padding: 2rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+        }
+
+        .profile-content {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .info-card,
+        .stats-card,
+        .actions-card,
+        .recent-activity {
+            padding: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            min-width: auto;
+            font-size: 0.875rem;
+        }
+
+        .activity-item {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .upload-section {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-container {
+            padding: 0 0.5rem;
+        }
+
+        .profile-header {
+            padding: 1.5rem 0.75rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+        }
+
+        .info-card,
+        .stats-card,
+        .actions-card,
+        .recent-activity {
+            padding: 1rem;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        {% if user.userprofile.profile_picture %}
+            <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.username }}" class="profile-avatar">
+        {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ user.first_name|default:user.username }}&background=4f46e5&color=fff&size=120" alt="{{ user.username }}" class="profile-avatar">
+        {% endif %}
+        
+        <h1 class="profile-name">
+            {% if user.first_name %}
+                {{ user.first_name }} {{ user.last_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        </h1>
+        
+        {% if user.userprofile.role %}
+            <span class="profile-role">{{ user.userprofile.role }}</span>
+        {% endif %}
+    </div>
+
+    <!-- Upload Profile Picture Section -->
+    <div class="upload-section" id="uploadSection">
+        <i class="fas fa-camera upload-icon"></i>
+        <p class="upload-text">Update your profile picture</p>
+        <form method="post" enctype="multipart/form-data" action="{% url 'issues:update_profile_picture' %}" id="uploadForm">
+            {% csrf_token %}
+            <input type="file" name="profile_picture" accept="image/*" class="file-input" id="fileInput">
+            <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-upload"></i> Choose Picture
+            </button>
+        </form>
+    </div>
+
+    <!-- Profile Content Grid -->
+    <div class="profile-content">
+        <!-- Personal Information -->
+        <div class="info-card">
+            <h3>
+                <i class="fas fa-user"></i>
+                Personal Information
+            </h3>
+            
+            <div class="info-item">
+                <i class="fas fa-user-circle"></i>
+                <span class="info-label">Username:</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email|default:"Not provided" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-id-badge"></i>
+                <span class="info-label">First Name:</span>
+                <span class="info-value">{{ user.first_name|default:"Not provided" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-id-card"></i>
+                <span class="info-label">Last Name:</span>
+                <span class="info-value">{{ user.last_name|default:"Not provided" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="info-label">Member Since:</span>
+                <span class="info-value">{{ user.date_joined|date:"F j, Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="info-card stats-card">
+            <h3>
+                <i class="fas fa-chart-bar"></i>
+                Your Statistics
+            </h3>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">{{ issues_raised_count }}</span>
+                    <span class="stat-label">Issues Raised</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number">{{ assigned_issues_count }}</span>
+                    <span class="stat-label">Assigned Issues</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number">{{ comments_count|default:"0" }}</span>
+                    <span class="stat-label">Comments Made</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number">{{ resolved_issues_count |default:"0" }}</span>
+                    <span class="stat-label">Issues Resolved</span>
+                </div>
+            </div>
+        </div> 
+
+        <!-- Actions -->
+        <div class="actions-card">
+            <h3>
+                <i class="fas fa-cogs"></i>
+                Account Actions
+            </h3>
+            
+            <div class="action-buttons">
+                
+                <a href="{% url 'issues:change_password' %}" class="btn btn-warning">
+                    <i class="fas fa-key"></i>
+                    Change Password
+                </a>
+                
+                <a href="{% url 'issues:my_issues' %}" class="btn btn-success">
+                    <i class="fas fa-list"></i>
+                    My Issues
+                </a>
+                
+                <a href="{% url 'issues:logout' %}" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <h3>
+            <i class="fas fa-clock"></i>
+            Recent Activity
+        </h3>
+        
+        {% if recent_activities %}
+            {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon {{ activity.type }}">
+                        {% if activity.type == 'created' %}
+                            <i class="fas fa-plus"></i>
+                        {% elif activity.type == 'updated' %}
+                            <i class="fas fa-edit"></i>
+                        {% elif activity.type == 'commented' %}
+                            <i class="fas fa-comment"></i>
+                        {% endif %}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ activity.description }}</div>
+                        <div class="activity-time">{{ activity.timestamp|timesince }} ago</div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #9ca3af;">
+                    <i class="fas fa-info"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">No recent activity</div>
+                    <div class="activity-time">Start by creating or updating an issue</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload functionality
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadSection = document.getElementById('uploadSection');
+    
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                return;
+            }
+            
+            // Auto-submit form
+            uploadForm.submit();
+        }
+    });
+    
+    // Drag and drop functionality
+    uploadSection.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadSection.classList.add('dragover');
+    });
+    
+    uploadSection.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadSection.classList.remove('dragover');
+    });
+    
+    uploadSection.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadSection.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    });
+    
+    // Animation on load
+    const cards = document.querySelectorAll('.info-card, .stats-card, .actions-card, .recent-activity');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+
 {% endblock %}

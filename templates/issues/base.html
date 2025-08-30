@@ -123,18 +123,22 @@
                         <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
                         <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
                         <a href="{% url 'issues:reports' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+                        <a href="{% url 'issues:profile' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user"></i><span>Profile</span></a>
                     {% elif user.userprofile.role == "manager" %}
                          <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-users-cog"></i><span>Manager View</span></a>
                         <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-list-alt"></i><span>All Issues</span></a>
                         <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle"></i><span>Raise an Issue</span></a>
                         <a href="{% url 'issues:reports' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+                        <a href="{% url 'issues:profile' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user"></i><span>Profile</span></a>
 
                     {% elif user.userprofile.role == "hardware" %}
                         <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-wrench"></i><span>My Work Queue</span></a>
                         <a href="{% url 'issues:issue_list' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-tasks"></i><span>Available Issues</span></a>
+                        <a href="{% url 'issues:profile' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user"></i><span>Profile</span></a>
                     {% elif user.userprofile.role == "employee" %}
                          <a href="{% url 'issues:dashboard' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user-circle w-5"></i><span>My Dashboard</span></a>
                          <a href="{% url 'issues:issue_create' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-plus-circle w-5"></i><span>Raise an Issue</span></a>
+                         <a href="{% url 'issues:profile' %}" class="flex items-center space-x-3 text-white py-3"><i class="fas fa-user"></i><span>Profile</span></a>
                     {% endif %}
 
                     <form method="post" action="{% url 'issues:logout' %}" class="pt-4 border-t border-white/10">

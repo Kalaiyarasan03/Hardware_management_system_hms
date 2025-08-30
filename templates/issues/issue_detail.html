@@ -2,6 +2,7 @@
 
 {% block content %}
 <style>
+    /* Base styles remain the same for desktop */
     .detail-container {
         max-width: 1200px;
         margin: 2rem auto;
@@ -35,6 +36,7 @@
         font-weight: 700;
         margin-bottom: 1rem;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        word-wrap: break-word;
     }
 
     .issue-id {
@@ -84,6 +86,7 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .info-item {
@@ -94,6 +97,7 @@
         padding: 0.75rem;
         background: #f8fafc;
         border-radius: 8px;
+        flex-wrap: wrap;
     }
 
     .info-item:last-child {
@@ -104,17 +108,21 @@
         color: #64748b;
         width: 20px;
         text-align: center;
+        flex-shrink: 0;
     }
 
     .info-label {
         font-weight: 600;
         color: #374151;
         min-width: 80px;
+        flex-shrink: 0;
     }
 
     .info-value {
         color: #64748b;
         flex: 1;
+        word-wrap: break-word;
+        min-width: 0;
     }
 
     .status-badge, .priority-badge {
@@ -127,6 +135,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;
+        white-space: nowrap;
     }
 
     .status-open { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
@@ -154,12 +163,20 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .description-section h3 small {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 400;
     }
 
     .description-text {
         color: #374151;
         line-height: 1.7;
         font-size: 1rem;
+        word-wrap: break-word;
     }
 
     .attachment-card {
@@ -211,6 +228,7 @@
         gap: 0.5rem;
         margin-bottom: 2rem;
         color: #374151;
+        flex-wrap: wrap;
     }
 
     .comments-header h3 {
@@ -243,6 +261,7 @@
         align-items: center;
         gap: 1rem;
         margin-bottom: 0.75rem;
+        flex-wrap: wrap;
     }
 
     .comment-author {
@@ -255,16 +274,21 @@
         display: flex;
         align-items: center;
         gap: 0.25rem;
+        white-space: nowrap;
     }
 
     .comment-time {
         color: #64748b;
         font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 
     .comment-content {
         color: #374151;
         line-height: 1.6;
+        word-wrap: break-word;
     }
 
     .no-comments {
@@ -293,14 +317,19 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .form-group {
         margin-bottom: 1.5rem;
     }
 
-    .form-control {
+    .form-control, 
+    .comment-form textarea,
+    .comment-form input[type="text"],
+    .comment-form input[type="email"] {
         width: 100%;
+        max-width: 100%;
         padding: 1rem;
         border: 2px solid #e5e7eb;
         border-radius: 12px;
@@ -311,12 +340,33 @@
         min-height: 120px;
         resize: vertical;
         font-family: inherit;
+        box-sizing: border-box;
     }
 
-    .form-control:focus {
+    .comment-form input[type="text"],
+    .comment-form input[type="email"] {
+        min-height: 50px;
+    }
+
+    .form-control:focus,
+    .comment-form textarea:focus,
+    .comment-form input:focus {
         outline: none;
         border-color: #0ea5e9;
         box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    /* Django form field styling */
+    .comment-form p {
+        margin-bottom: 1rem;
+    }
+
+    .comment-form label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
     }
 
     .btn {
@@ -333,6 +383,9 @@
         border: none;
         position: relative;
         overflow: hidden;
+        text-align: center;
+        justify-content: center;
+        min-height: 44px;
     }
 
     .btn::before {
@@ -399,17 +452,18 @@
         border-radius: 16px;
         padding: 2rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border-left: 4px solid #f59e0b;
+        border-left: 4px solid #4f46e5;
     }
 
     .action-buttons h3 {
-        color: #f59e0b;
+        color: #4f46e5;
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .action-group {
@@ -419,9 +473,34 @@
         align-items: center;
     }
 
+    /* === RESPONSIVE STYLES === */
+    
+    /* Tablet styles */
+    @media (max-width: 1024px) {
+        .detail-container {
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+        
+        .main-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .issue-sidebar {
+            order: -1;
+        }
+        
+        .info-card,
+        .action-buttons {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Mobile styles */
     @media (max-width: 768px) {
         .detail-container {
-            padding: 0 0.5rem;
+            padding: 0 0.75rem;
             margin: 1rem auto;
         }
         
@@ -431,25 +510,228 @@
         }
         
         .issue-content,
-        .comments-section {
+        .comments-section,
+        .comment-form {
             padding: 1.5rem;
+            border-radius: 16px;
         }
         
         .issue-header {
             padding: 2rem 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
         }
         
         .issue-header h2 {
             font-size: 1.75rem;
+            line-height: 1.2;
+        }
+        
+        .description-section {
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .description-section h3 {
+            font-size: 1.1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+        
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .info-label {
+            min-width: auto;
+            font-size: 0.875rem;
+        }
+        
+        .info-value {
+            font-size: 0.875rem;
+        }
+        
+        .comment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .comment-item {
+            padding: 1rem;
+        }
+        
+        .comment-item:hover {
+            transform: none;
         }
         
         .action-group {
             flex-direction: column;
+            width: 100%;
         }
         
         .btn {
             width: 100%;
             justify-content: center;
+            padding: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .comments-header h3 {
+            font-size: 1.25rem;
+        }
+        
+        .comment-form h4 {
+            font-size: 1.1rem;
+        }
+        
+        .status-badge, .priority-badge {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+
+    /* Small mobile styles */
+    @media (max-width: 480px) {
+        .detail-container {
+            padding: 0 0.5rem;
+            margin: 0.5rem auto;
+        }
+        
+        .issue-content,
+        .comments-section,
+        .comment-form,
+        .info-card,
+        .action-buttons {
+            padding: 1rem;
+        }
+        
+        .issue-header {
+            padding: 1.5rem 0.75rem;
+        }
+        
+        .issue-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .description-section {
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .attachment-card {
+            padding: 1rem;
+        }
+        
+        .comment-item {
+            padding: 0.75rem;
+        }
+        
+        .form-control,
+        .comment-form textarea,
+        .comment-form input[type="text"],
+        .comment-form input[type="email"] {
+            padding: 0.875rem;
+            font-size: 0.95rem;
+            min-height: 100px;
+        }
+
+        .comment-form input[type="text"],
+        .comment-form input[type="email"] {
+            min-height: 44px;
+        }
+
+        .comment-form {
+            padding: 1rem;
+        }
+
+        .comment-form label {
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 0.875rem;
+            font-size: 0.9rem;
+        }
+        
+        .attachment-card i {
+            font-size: 1.5rem;
+        }
+        
+        .no-comments i {
+            font-size: 1.5rem !important;
+        }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 360px) {
+        .issue-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .status-badge, .priority-badge {
+            font-size: 0.65rem;
+            padding: 0.35rem 0.7rem;
+        }
+        
+        .info-item {
+            padding: 0.75rem;
+        }
+        
+        .btn {
+            font-size: 0.85rem;
+            padding: 0.75rem;
+        }
+    }
+
+    /* Touch improvements */
+    @media (max-width: 768px) {
+        .attachment-link {
+            min-height: 44px;
+            padding: 1rem 1.5rem;
+        }
+        
+        .info-card {
+            margin-bottom: 1rem;
+        }
+        
+        .action-buttons {
+            margin-bottom: 1rem;
+        }
+        
+        .form-control,
+        .comment-form textarea,
+        .comment-form input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* Prevent horizontal overflow */
+        .comment-form,
+        .comment-form * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Specific mobile textarea styling */
+        .comment-form textarea {
+            resize: vertical;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        body {
+            overflow-x: hidden;
+        }
+        
+        * {
+            box-sizing: border-box;
         }
     }
 </style>
@@ -465,7 +747,7 @@
     <div class="main-grid">
         <div class="issue-content">
             <div class="description-section">
-                 <h3>
+                <h3>
                     <i class="fas fa-file-alt"></i>
                     Description
                     <small class="text-muted">
@@ -538,7 +820,7 @@
                             {{ issue.assigned_to.username }} 
                         {% else %} 
                             <em>Unassigned</em> 
-                            {% endif %}
+                        {% endif %}
                     </span>
                 </div>
                 <div class="info-item">
@@ -553,7 +835,6 @@
                     </span>
                 </div>
 
-                <!-- ADD FLOOR -->
                 <div class="info-item">
                     <i class="fas fa-building"></i>
                     <span class="info-label">Floor:</span>
@@ -561,41 +842,60 @@
                         {% if issue.floor %}
                             {{ issue.floor }}
                         {% else %}
-                    <em>Not specified</em>
-                    {% endif %}
+                            <em>Not specified</em>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-store"></i>
+                    <span class="info-label">Category:</span>
+                    <span class="info-value">
+                        {% if issue.category %}
+                            {{ issue.category }}
+                        {% else %}
+                            <em>Not specified</em>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <i class="fas fa-building"></i>
+                    <span class="info-label">Subcategory:</span>
+                    <span class="info-value">
+                        {% if issue.subcategory %}
+                            {{ issue.subcategory }}
+                        {% else %}
+                            <em>Not specified</em>
+                        {% endif %}
                     </span>
                 </div>
             </div>
 
-            {% if user.is_authenticated %}  
-            {% if user.userprofile.role == 'manager' or user.is_superuser %}
-            <div class="action-buttons">
-                {% if issue.assigned_to == user and issue.status != 'resolved' %}
-                    <a href="{% url 'issues:resolve_issue' issue.id %}" class="btn btn-success">
-                        <i class="fas fa-check"></i>
-                        Mark Resolved
-                    </a>
+            {% if user.is_authenticated %}
+                {% if user.userprofile.role == 'manager' or user.userprofile.role == 'hardware' or user.is_superuser %}
+                
+                    <div class="action-buttons">
+                        <h3>
+                            <i class="fas fa-cogs"></i>
+                            Actions
+                        </h3>
+                        <div class="action-group">
+                             {% if issue.assigned_to == user and issue.status != 'resolved' %}
+                            <a href="{% url 'issues:resolve_issue' issue.id %}" class="btn btn-success">
+                                <i class="fas fa-check"></i>
+                                Mark Resolved
+                            </a>
+                            {% endif %}
+                           
+                            
+                                <a href="{% url 'issues:issue_update' issue.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-edit"></i>
+                                        Update / Assign
+                                </a>
+                           
+                        </div>
+                    </div>
                 {% endif %}
-            </div>
-        </div>
-    {% endif %}
-{% endif %}
-            {% if user.is_authenticated %}  
-           {% if user.userprofile.role == 'manager' or user.userprofile.role == 'hardware' or user.is_superuser %}
-
-            <div class="action-buttons">
-                <h3>
-                    <i class="fas fa-cogs"></i>
-                    Management
-                </h3>
-                <div class="action-group">
-                    <a href="{% url 'issues:issue_update' issue.id %}" class="btn btn-secondary">
-                        <i class="fas fa-edit"></i>
-                        Update / Assign
-                    </a>
-                </div>
-            </div>
-            {% endif %}
             {% endif %}
         </div>
     </div>
@@ -653,43 +953,47 @@
 </div>
 
 <script>
-// Add subtle animations when page loads
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.info-card, .issue-content, .comments-section, .action-buttons');
     
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
+    // Check if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    
+    if (!prefersReducedMotion.matches) {
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
 
-    // Add hover effects to comment items
-    const commentItems = document.querySelectorAll('.comment-item');
-    commentItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        // Add hover effects to comment items
+        const commentItems = document.querySelectorAll('.comment-item');
+        commentItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.boxShadow = 'none';
+            });
         });
-        
-        item.addEventListener('mouseleave', function() {
-            this.style.boxShadow = 'none';
+    }
+
+    // Form enhancement
+    const form = document.querySelector('form[action*="post_comment"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const button = this.querySelector('button[type="submit"]');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            button.disabled = true;
         });
-    });
+    }
 });
-
-// Form enhancement
-const form = document.querySelector('form[action*="post_comment"]');
-if (form) {
-    form.addEventListener('submit', function(e) {
-        const button = this.querySelector('button[type="submit"]');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        button.disabled = true;
-    });
-}
 </script>
 
 {% endblock %}

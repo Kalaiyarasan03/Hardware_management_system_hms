@@ -14,7 +14,6 @@
     <form method="post" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:1rem;">
         {% csrf_token %}
         
-        <!-- Render form fields with styling -->
         {% for field in form %}
         <div>
             <label for="{{ field.id_for_label }}" style="display:block; font-weight:500; margin-bottom:0.3rem;">
@@ -36,7 +35,6 @@
     </form>
 </div>
 
-<!-- Optional CSS to style Django form fields -->
 <style>
   input, select, textarea {
     width: 100%;
@@ -51,4 +49,44 @@
     box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
   }
 </style>
+
+<script>
+  const subcategoryMap = {
+    'hardware': ['POS', 'Printer', 'Computer', 'Server', 'Weighing Scale', 'Kiosk'],
+    'network': ['Airtel', 'BSNL', 'Vodaphone'],
+    'application': ['SAP', 'Zakya', 'P2P', 'VMS', 'PetPooja'],
+    'middle ware': ['PineLabs', 'PayTM'],
+    'others': ['Others']
+  };
+
+  const categorySelect = document.getElementById('id_category');
+  const subcategorySelect = document.getElementById('id_subcategory');
+
+  function updateSubcategories() {
+    const category = categorySelect.value.toLowerCase();
+    const subcategories = subcategoryMap[category] || [];
+    
+    // Preserve currently selected subcategory if possible
+    const currentSubcat = subcategorySelect.value;
+
+    subcategorySelect.innerHTML = '';
+
+    subcategories.forEach(subcat => {
+      const option = document.createElement('option');
+      option.value = subcat;
+      option.textContent = subcat;
+      if (subcat === currentSubcat) {
+        option.selected = true;
+      }
+      subcategorySelect.appendChild(option);
+    });
+  }
+
+  categorySelect.addEventListener('change', updateSubcategories);
+
+  // Initialize on page load if category is preselected
+  if (categorySelect.value) {
+    updateSubcategories();
+  }
+</script>
 {% endblock %}

@@ -1,5 +1,7 @@
 {% extends 'issues/base.html' %}
+{% load static %}
 
+{% block title %}Login{% endblock %}
 {% block content %}
 <div style="
     max-width: 400px;
@@ -9,6 +11,10 @@
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 ">
+    <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <img src="{% static '9270aa95-f612-4040-8589-c679594250c0.jpeg' %}" alt="Logo" style="max-width: 150px; height: auto;">
+    </div>
+
     <h2 style="text-align:center; margin-bottom:1.5rem; color:#374151;">Login</h2>
 
     <form method="post" style="display:flex; flex-direction:column; gap:1rem;">

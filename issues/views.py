@@ -7,6 +7,17 @@ from .forms import IssueForm, CommentForm
 from django.contrib.auth.models import User
 from django.db.models import Q,Count
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
+from django.db.models import Q
+from .models import Issue, Comment, UserProfile
+from .forms import UserProfileForm, EditUserForm  # You'll need to create these forms
+
+
 def user_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -71,6 +82,19 @@ def dashboard(request):
         # Fallback for an unknown role
         messages.error(request, f"Unknown role '{role}' assigned to your profile.")
         return redirect('profile')
+    
+def create_issue(request):
+    if request.method == 'POST':
+        form = IssueForm(request.POST)
+        if form.is_valid():
+            issue = form.save(commit=False)
+            issue.created_by = request.user  # if you track who creates the issue
+            issue.save()
+            return redirect('issues:my_issues')  # Redirect after creation
+    else:
+        form = IssueForm()
+    
+    return render(request, 'issues/create_issue.html', {'form': form})
     
 @login_required
 def issue_create(request):
@@ -190,24 +214,147 @@ def reports(request):
     }
     return render(request, "issues/reports.html", context)
 
+# Add these views to your issues/views.py file
+
 @login_required
 def profile(request):
-    return render(request, 'issues/profile.html')
-
-def some_view(request):
-    role = None
-    if request.user.userprofile.role(name="admin").exists():
-        role = "admin"
-    elif request.user.userprofile.role(name="manager").exists():
-        role = "manager"
-    elif request.user.userprofile.role(name="employee").exists():
-        role = "employee"
-    elif request.user.userprofile.role(name="hardware").exists():
-        role = "hardware"
+    """Display user profile page"""
+    # Get or create user profile
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
     
-    return render(request, "issues/base.html", {"role": role})
+    # Get user statistics
+    issues_raised = Issue.objects.filter(raised_by=request.user)
+    assigned_issues = Issue.objects.filter(assigned_to=request.user)
+    resolved_issues = Issue.objects.filter(assigned_to=request.user, status='resolved')
+    user_comments = Comment.objects.filter(author=request.user)
+    
+    # Get recent activities (last 10)
+    recent_activities = []
+    
+    # Recent issues created
+    for issue in issues_raised.order_by('-created_at')[:5]:
+        recent_activities.append({
+            'type': 'created',
+            'description': f'Created issue: {issue.title}',
+            'timestamp': issue.created_at,
+        })
+    
+    # Recent comments
+    for comment in user_comments.order_by('-created_at')[:5]:
+        recent_activities.append({
+            'type': 'commented',
+            'description': f'Commented on: {comment.issue.title}',
+            'timestamp': comment.created_at,
+        })
+    
+    # Sort by timestamp and get latest 10
+    recent_activities = sorted(recent_activities, key=lambda x: x['timestamp'], reverse=True)[:10]
+    
+    context = {
+        'issues_raised_count': issues_raised.count(),
+        'assigned_issues_count': assigned_issues.count(),
+        'resolved_issues_count': resolved_issues.count(),
+        'comments_count': user_comments.count(),
+        'recent_activities': recent_activities,
+    }
+    
+    return render(request, 'issues/profile.html', context)
 
+@login_required
+def edit_profile(request):
+    """Edit user profile information"""
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        user_form = EditUserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('issues:profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        user_form = EditUserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=profile)
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    
+    return render(request, 'issues/edit_profile.html', context)
 
+@login_required
+def update_profile_picture(request):
+    """Update user profile picture via AJAX or form submission"""
+    if request.method == 'POST':
+        if 'profile_picture' in request.FILES:
+            profile, created = UserProfile.objects.get_or_create(user=request.user)
+            
+            # Delete old profile picture if exists
+            if profile.profile_picture:
+                profile.profile_picture.delete()
+            
+            profile.profile_picture = request.FILES['profile_picture']
+            profile.save()
+            messages.success(request, 'Profile picture updated successfully!')
+        else:
+            messages.error(request, 'No image file was uploaded.')
+    
+    return redirect('issues:profile')
+
+@login_required
+def change_password(request):
+    """Change user password"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important for keeping user logged in
+            messages.success(request, 'Your password has been changed successfully!')
+            return redirect('issues:profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    context = {'form': form}
+    return render(request, 'issues/change_password.html', context)
+
+@login_required
+def my_issues(request):
+    """Display user's issues (both created and assigned)"""
+    # Get issues created by user
+    created_issues = Issue.objects.filter(raised_by=request.user)
+    
+    # Get issues assigned to user
+    assigned_issues = Issue.objects.filter(assigned_to=request.user)
+    
+    # Combine and remove duplicates
+    all_user_issues = (created_issues | assigned_issues).distinct().order_by('-created_at')
+    
+    # Add filter functionality
+    status_filter = request.GET.get('status', '')
+    priority_filter = request.GET.get('priority', '')
+    
+    if status_filter:
+        all_user_issues = all_user_issues.filter(status=status_filter)
+    
+    if priority_filter:
+        all_user_issues = all_user_issues.filter(priority=priority_filter)
+    
+    context = {
+        'issues': all_user_issues,
+        'created_count': created_issues.count(),
+        'assigned_count': assigned_issues.count(),
+        'status_filter': status_filter,
+        'priority_filter': priority_filter,
+    }
+    
+    return render(request, 'issues/my_issues.html', context)
 
 # CSV Download view
 import csv
